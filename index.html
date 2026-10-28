@@ -1,0 +1,1406 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Petualangan Satuan Berat - Kelas 3 SD</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Font Family -->
+    <link href="https://fonts.googleapis.com/css2?family=Comic+Neue:wght@400;700&family=Fredoka:wght@400;600;700&display=swap" rel="stylesheet">
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Canvas Confetti -->
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.5.1/dist/confetti.browser.min.js"></script>
+
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        brand: {
+                            yellow: '#FFD166',
+                            green: '#06D6A0',
+                            blue: '#118AB2',
+                            pink: '#EF476F',
+                            purple: '#8338EC',
+                            orange: '#FF9F1C'
+                        }
+                    },
+                    fontFamily: {
+                        fredoka: ['Fredoka', 'sans-serif'],
+                        comic: ['Comic Neue', 'cursive']
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        body {
+            font-family: 'Fredoka', cursive, sans-serif;
+            background: linear-gradient(135deg, #e0f7fa 0%, #fff9c4 100%);
+            min-height: 100vh;
+            user-select: none;
+        }
+
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #f1f1f1;
+            border-radius: 10px;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #06D6A0;
+            border-radius: 10px;
+        }
+
+        /* Card Effects */
+        .card-bounce {
+            transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+        .card-bounce:hover {
+            transform: translateY(-5px) scale(1.02);
+        }
+
+        /* Pulse Animations */
+        @keyframes pulse-subtle {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+        }
+        .pulse-btn {
+            animation: pulse-subtle 2s infinite;
+        }
+
+        /* Glassmorphism */
+        .glass-card {
+            background: rgba(255, 255, 255, 0.85);
+            backdrop-filter: blur(10px);
+            border: 4px solid #ffffff;
+            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1);
+        }
+
+        .drop-zone {
+            min-height: 120px;
+            border: 3px dashed #118AB2;
+            transition: all 0.2s;
+        }
+        .drop-zone.dragover {
+            background-color: rgba(6, 214, 160, 0.2);
+            border-color: #06D6A0;
+            transform: scale(1.02);
+        }
+
+        .selected-item {
+            ring: 4px solid #FF9F1C;
+            transform: scale(1.05);
+        }
+    </style>
+</head>
+<body class="text-slate-800 pb-12 flex flex-col min-h-screen">
+
+    <!-- TOP NAVIGATION BAR -->
+    <header class="sticky top-0 z-50 bg-white/90 backdrop-blur-md shadow-md border-b-4 border-brand-yellow px-4 py-2">
+        <div class="max-w-6xl mx-auto flex flex-wrap items-center justify-between gap-2">
+            <!-- Logo / Brand -->
+            <div class="flex items-center gap-3 cursor-pointer" onclick="showTab('beranda')">
+                <div class="w-12 h-12 rounded-2xl bg-brand-yellow flex items-center justify-center text-2xl shadow-md transform -rotate-6">
+                    ⚖️
+                </div>
+                <div>
+                    <h1 class="text-xl md:text-2xl font-bold text-brand-blue leading-none">Petualangan Berat</h1>
+                    <p class="text-xs text-slate-500 font-semibold">Matematika Kelas 3 SD</p>
+                </div>
+            </div>
+
+            <!-- Stats Bar -->
+            <div class="flex items-center gap-3 bg-slate-100 px-4 py-1.5 rounded-full border-2 border-slate-200">
+                <div class="flex items-center gap-1 text-amber-500 font-bold text-sm md:text-base">
+                    <i class="fa-solid fa-star text-lg"></i>
+                    <span id="global-score">0</span> XP
+                </div>
+                <div class="h-4 w-0.5 bg-slate-300"></div>
+                <div class="flex items-center gap-1 text-brand-purple font-bold text-sm md:text-base">
+                    <i class="fa-solid fa-medal text-lg"></i>
+                    <span id="badge-count">0/5</span>
+                </div>
+            </div>
+
+            <!-- Mobile Menu Toggle Button -->
+            <button onclick="toggleMobileMenu()" class="md:hidden text-2xl text-slate-700 p-2 focus:outline-none">
+                <i class="fa-solid fa-bars"></i>
+            </button>
+
+            <!-- Main Navigation Links -->
+            <nav id="nav-menu" class="hidden md:flex w-full md:w-auto items-center gap-1 mt-2 md:mt-0 font-bold text-sm">
+                <button onclick="showTab('beranda')" class="nav-btn active flex items-center gap-2 px-3 py-2 rounded-xl transition hover:bg-amber-100 text-slate-700" data-tab="beranda">
+                    🏠 <span>Beranda</span>
+                </button>
+                <button onclick="showTab('materi')" class="nav-btn flex items-center gap-2 px-3 py-2 rounded-xl transition hover:bg-emerald-100 text-slate-700" data-tab="materi">
+                    📚 <span>Materi</span>
+                </button>
+                <button onclick="showTab('simulasi')" class="nav-btn flex items-center gap-2 px-3 py-2 rounded-xl transition hover:bg-sky-100 text-slate-700" data-tab="simulasi">
+                    🔬 <span>Simulasi</span>
+                </button>
+                <button onclick="showTab('permainan')" class="nav-btn flex items-center gap-2 px-3 py-2 rounded-xl transition hover:bg-pink-100 text-slate-700" data-tab="permainan">
+                    🎮 <span>Permainan</span>
+                </button>
+                <button onclick="showTab('kuis')" class="nav-btn flex items-center gap-2 px-3 py-2 rounded-xl transition hover:bg-purple-100 text-slate-700" data-tab="kuis">
+                    📝 <span>Kuis</span>
+                </button>
+                <button onclick="showTab('hasil')" class="nav-btn flex items-center gap-2 px-3 py-2 rounded-xl transition hover:bg-orange-100 text-slate-700" data-tab="hasil">
+                    🏆 <span>Hasil</span>
+                </button>
+            </nav>
+        </div>
+    </header>
+
+    <!-- MAIN CONTENT CONTAINER -->
+    <main class="max-w-6xl mx-auto px-4 py-6 flex-grow w-full">
+
+        <!-- ================= BERANDA ================= -->
+        <section id="tab-beranda" class="tab-content">
+            <div class="glass-card rounded-3xl p-6 md:p-10 mb-8 text-center relative overflow-hidden border-b-8 border-brand-yellow">
+                <div class="absolute -top-10 -left-10 w-32 h-32 bg-yellow-300 rounded-full opacity-40 blur-xl"></div>
+                <div class="absolute -bottom-10 -right-10 w-40 h-40 bg-emerald-300 rounded-full opacity-40 blur-xl"></div>
+
+                <span class="bg-amber-100 text-amber-800 text-xs md:text-sm font-bold px-4 py-1.5 rounded-full inline-block mb-4 border border-amber-300">
+                    ✨ Halo Pahlawan Matematika Cilik!
+                </span>
+
+                <h2 class="text-3xl md:text-5xl font-extrabold text-slate-800 mb-4 tracking-wide">
+                    Ayo Belajar <span class="text-brand-pink underline decoration-wavy decoration-yellow-400">Pengukuran Berat</span>!
+                </h2>
+
+                <p class="text-slate-600 text-base md:text-lg max-w-2xl mx-auto mb-8 font-comic">
+                    Mari menjelajah dunia timbangan, mengenal Kilogram (kg) dan Gram (g), serta selesaikan misi-misi seru untuk mengumpulkan semua lencana penghargaan!
+                </p>
+
+                <!-- Quick Start Button -->
+                <div class="flex flex-wrap justify-center gap-4">
+                    <button onclick="showTab('materi')" class="pulse-btn bg-brand-green hover:bg-emerald-500 text-white font-bold text-lg px-8 py-4 rounded-2xl shadow-lg border-b-4 border-emerald-700 flex items-center gap-3 transition">
+                        <i class="fa-solid fa-play text-xl"></i> Mulai Petualangan!
+                    </button>
+                    <button onclick="showTab('simulasi')" class="bg-brand-blue hover:bg-sky-600 text-white font-bold text-lg px-6 py-4 rounded-2xl shadow-lg border-b-4 border-sky-800 flex items-center gap-3 transition">
+                        <i class="fa-solid fa-flask text-xl"></i> Coba Simulasi
+                    </button>
+                </div>
+            </div>
+
+            <!-- Target Pembelajaran Cards -->
+            <h3 class="text-xl font-bold text-slate-700 mb-4 flex items-center gap-2">
+                <i class="fa-solid fa-bullseye text-brand-pink"></i> Target Pembelajaran Kita:
+            </h3>
+
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div class="glass-card p-5 rounded-2xl border-l-8 border-brand-pink card-bounce">
+                    <div class="text-3xl mb-2">🍎</div>
+                    <h4 class="font-bold text-lg text-slate-800">Mengenal Satuan Berat</h4>
+                    <p class="text-xs text-slate-600 font-comic mt-1">Memahami perbedaan satuan berat Kilogram (kg), Hektogram/Ons (hg), dan Gram (g).</p>
+                </div>
+
+                <div class="glass-card p-5 rounded-2xl border-l-8 border-brand-green card-bounce">
+                    <div class="text-3xl mb-2">⚖️</div>
+                    <h4 class="font-bold text-lg text-slate-800">Membaca Timbangan</h4>
+                    <p class="text-xs text-slate-600 font-comic mt-1">Belajar membaca hasil pengukuran benda menggunakan timbangan kue & timbangan badan.</p>
+                </div>
+
+                <div class="glass-card p-5 rounded-2xl border-l-8 border-brand-purple card-bounce">
+                    <div class="text-3xl mb-2">🔄</div>
+                    <h4 class="font-bold text-lg text-slate-800">Mengubah Satuan</h4>
+                    <p class="text-xs text-slate-600 font-comic mt-1">Mampu mengubah satuan berat dari 1 kg = 1.000 g atau 1 kg = 10 Ons dengan mudah.</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- ================= MATERI ================= -->
+        <section id="tab-materi" class="tab-content hidden">
+            <div class="mb-6 flex justify-between items-center">
+                <div>
+                    <h2 class="text-2xl md:text-3xl font-bold text-brand-blue">📚 Materi Pembelajaran</h2>
+                    <p class="text-xs md:text-sm text-slate-500">Pelajari hubungan antar satuan berat berikut ini!</p>
+                </div>
+            </div>
+
+            <!-- Tab Sub-Materi Cards -->
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+                <!-- Concept Card 1 -->
+                <div class="glass-card p-6 rounded-3xl border-t-8 border-brand-yellow">
+                    <div class="flex items-center gap-3 mb-4">
+                        <span class="text-3xl bg-yellow-100 p-2 rounded-2xl">⚖️</span>
+                        <h3 class="text-xl font-bold text-slate-800">Apa itu Satuan Berat?</h3>
+                    </div>
+                    <p class="text-slate-600 font-comic leading-relaxed text-sm md:text-base">
+                        Satuan berat digunakan untuk mengukur seberapa berat suatu benda. 
+                        Benda yang ringan biasanya diukur dalam <b>Gram (g)</b>, sedangkan benda yang berat diukur dalam <b>Kilogram (kg)</b>.
+                    </p>
+                    <div class="mt-4 bg-amber-50 p-4 rounded-2xl border border-amber-200">
+                        <h4 class="font-bold text-amber-800 text-sm mb-2">Contoh Benda Sehari-hari:</h4>
+                        <ul class="text-xs md:text-sm text-amber-900 space-y-1 font-comic">
+                            <li>🍉 Semangka ➔ diukur dengan <b>kg</b> (~3 kg)</li>
+                            <li>✏️ Penghapus ➔ diukur dengan <b>g</b> (~15 g)</li>
+                            <li>🎒 Tas Sekolah ➔ diukur dengan <b>kg</b> (~2 kg)</li>
+                            <li>🍬 Permen ➔ diukur dengan <b>g</b> (~5 g)</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- Concept Card 2 -->
+                <div class="glass-card p-6 rounded-3xl border-t-8 border-brand-green">
+                    <div class="flex items-center gap-3 mb-4">
+                        <span class="text-3xl bg-emerald-100 p-2 rounded-2xl">🔢</span>
+                        <h3 class="text-xl font-bold text-slate-800">Rumus Tangga Satuan Berat</h3>
+                    </div>
+                    <p class="text-slate-600 font-comic leading-relaxed text-sm mb-2">
+                        Ingat kunci rahasia konversi berat berikut:
+                    </p>
+                    
+                    <div class="space-y-3 font-bold text-slate-700">
+                        <div class="flex items-center justify-between p-3 bg-emerald-50 rounded-xl border border-emerald-200 text-sm md:text-base">
+                            <span>1 Kilogram (kg)</span>
+                            <span class="text-brand-green">= 1.000 Gram (g)</span>
+                        </div>
+                        <div class="flex items-center justify-between p-3 bg-emerald-50 rounded-xl border border-emerald-200 text-sm md:text-base">
+                            <span>1 Kilogram (kg)</span>
+                            <span class="text-brand-green">= 10 Ons (hg)</span>
+                        </div>
+                        <div class="flex items-center justify-between p-3 bg-emerald-50 rounded-xl border border-emerald-200 text-sm md:text-base">
+                            <span>1 Ons (hg)</span>
+                            <span class="text-brand-green">= 100 Gram (g)</span>
+                        </div>
+                    </div>
+
+                    <div class="mt-4 text-xs text-slate-500 italic text-center font-comic">
+                        💡 Tips: Jika turun 1 tangga dikali 10, jika naik 1 tangga dibagi 10!
+                    </div>
+                </div>
+            </div>
+
+            <!-- Interaktif Visual Ladder -->
+            <div class="glass-card p-6 rounded-3xl mb-6">
+                <h3 class="text-lg font-bold text-slate-800 mb-4 text-center">🪜 Visualisasi Tangga Satuan Berat</h3>
+                <div class="flex flex-wrap justify-center items-center gap-2 max-w-2xl mx-auto">
+                    <div class="bg-red-500 text-white font-bold p-3 rounded-xl shadow text-center w-20">kg</div>
+                    <i class="fa-solid fa-arrow-right text-slate-400"></i>
+                    <div class="bg-orange-500 text-white font-bold p-3 rounded-xl shadow text-center w-20">hg (ons)</div>
+                    <i class="fa-solid fa-arrow-right text-slate-400"></i>
+                    <div class="bg-yellow-500 text-white font-bold p-3 rounded-xl shadow text-center w-20">dag</div>
+                    <i class="fa-solid fa-arrow-right text-slate-400"></i>
+                    <div class="bg-green-500 text-white font-bold p-3 rounded-xl shadow text-center w-20">g</div>
+                    <i class="fa-solid fa-arrow-right text-slate-400"></i>
+                    <div class="bg-blue-500 text-white font-bold p-3 rounded-xl shadow text-center w-20">dg</div>
+                    <i class="fa-solid fa-arrow-right text-slate-400"></i>
+                    <div class="bg-indigo-500 text-white font-bold p-3 rounded-xl shadow text-center w-20">cg</div>
+                    <i class="fa-solid fa-arrow-right text-slate-400"></i>
+                    <div class="bg-purple-500 text-white font-bold p-3 rounded-xl shadow text-center w-20">mg</div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ================= SIMULASI ================= -->
+        <section id="tab-simulasi" class="tab-content hidden">
+            <div class="mb-6">
+                <h2 class="text-2xl md:text-3xl font-bold text-brand-blue">🔬 Simulasi Timbangan Interaktif</h2>
+                <p class="text-xs md:text-sm text-slate-500">Pilih benda dan beban untuk melihat timbangan seimbang secara nyata!</p>
+            </div>
+
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                <!-- Control Panel (Left) -->
+                <div class="glass-card p-6 rounded-3xl space-y-6 border-t-8 border-brand-blue">
+                    <h3 class="font-bold text-lg text-slate-800 border-b pb-2">1. Pilih Benda di Mangkuk Kiri</h3>
+                    
+                    <div class="grid grid-cols-2 gap-3">
+                        <button onclick="setSimItem('Apel', 200, '🍎')" class="sim-item-btn p-3 bg-red-50 hover:bg-red-100 rounded-2xl border border-red-200 text-left transition flex items-center gap-2">
+                            <span class="text-2xl">🍎</span>
+                            <div>
+                                <div class="font-bold text-xs text-slate-800">Apel</div>
+                                <div class="text-[10px] text-slate-500">200 gram</div>
+                            </div>
+                        </button>
+                        <button onclick="setSimItem('Semangka', 2000, '🍉')" class="sim-item-btn p-3 bg-green-50 hover:bg-green-100 rounded-2xl border border-green-200 text-left transition flex items-center gap-2">
+                            <span class="text-2xl">🍉</span>
+                            <div>
+                                <div class="font-bold text-xs text-slate-800">Semangka</div>
+                                <div class="text-[10px] text-slate-500">2 kg (2000g)</div>
+                            </div>
+                        </button>
+                        <button onclick="setSimItem('Buku', 500, '📚')" class="sim-item-btn p-3 bg-blue-50 hover:bg-blue-100 rounded-2xl border border-blue-200 text-left transition flex items-center gap-2">
+                            <span class="text-2xl">📚</span>
+                            <div>
+                                <div class="font-bold text-xs text-slate-800">Buku</div>
+                                <div class="text-[10px] text-slate-500">500 gram</div>
+                            </div>
+                        </button>
+                        <button onclick="setSimItem('Kucing', 3000, '🐱')" class="sim-item-btn p-3 bg-amber-50 hover:bg-amber-100 rounded-2xl border border-amber-200 text-left transition flex items-center gap-2">
+                            <span class="text-2xl">🐱</span>
+                            <div>
+                                <div class="font-bold text-xs text-slate-800">Boneka Kucing</div>
+                                <div class="text-[10px] text-slate-500">3 kg (3000g)</div>
+                            </div>
+                        </button>
+                    </div>
+
+                    <h3 class="font-bold text-lg text-slate-800 border-b pb-2 pt-2">2. Tambahkan Beban di Mangkuk Kanan</h3>
+                    <div class="flex flex-wrap gap-2">
+                        <button onclick="addSimWeight(100)" class="px-3 py-2 bg-slate-200 hover:bg-slate-300 font-bold rounded-xl text-xs text-slate-700 shadow">+100 g</button>
+                        <button onclick="addSimWeight(500)" class="px-3 py-2 bg-slate-200 hover:bg-slate-300 font-bold rounded-xl text-xs text-slate-700 shadow">+500 g</button>
+                        <button onclick="addSimWeight(1000)" class="px-3 py-2 bg-amber-200 hover:bg-amber-300 font-bold rounded-xl text-xs text-amber-900 shadow">+1 kg (1000g)</button>
+                    </div>
+
+                    <button onclick="resetSim()" class="w-full py-2 bg-rose-100 hover:bg-rose-200 text-rose-700 font-bold rounded-xl text-xs transition border border-rose-300">
+                        🔄 Reset Timbangan
+                    </button>
+                </div>
+
+                <!-- Simulation Canvas Area (Center/Right) -->
+                <div class="lg:col-span-2 glass-card p-6 rounded-3xl flex flex-col items-center justify-between border-t-8 border-brand-green relative overflow-hidden min-h-[350px]">
+                    <!-- Display Weight Readout -->
+                    <div class="w-full flex justify-between items-center bg-slate-100 p-4 rounded-2xl border">
+                        <div class="text-center">
+                            <div class="text-xs text-slate-500 font-bold">Kiri (Benda):</div>
+                            <div id="sim-left-weight" class="text-lg md:text-xl font-bold text-brand-pink">0 gram</div>
+                        </div>
+                        <div id="sim-status-badge" class="px-4 py-1 bg-amber-100 text-amber-800 rounded-full font-bold text-xs md:text-sm">
+                            ⚠️ Belum Seimbang
+                        </div>
+                        <div class="text-center">
+                            <div class="text-xs text-slate-500 font-bold">Kanan (Beban):</div>
+                            <div id="sim-right-weight" class="text-lg md:text-xl font-bold text-brand-blue">0 gram</div>
+                        </div>
+                    </div>
+
+                    <!-- Visual Seesaw Scale -->
+                    <div class="w-full relative my-12 flex justify-center items-center">
+                        <!-- Scale Stand -->
+                        <div class="w-8 h-32 bg-slate-400 rounded-t-lg z-0 relative">
+                            <div class="absolute bottom-0 -left-6 w-20 h-4 bg-slate-600 rounded-t-lg"></div>
+                        </div>
+
+                        <!-- Rotating Seesaw Beam -->
+                        <div id="sim-beam" class="absolute top-4 w-4/5 h-4 bg-slate-700 rounded-full transition-transform duration-500 flex justify-between items-center px-2 z-10" style="transform: rotate(0deg);">
+                            <!-- Left Basket -->
+                            <div class="relative -ml-4 flex flex-col items-center">
+                                <div class="w-1 h-16 bg-slate-400"></div>
+                                <div class="w-24 h-12 bg-amber-400 rounded-b-full border-2 border-amber-600 flex items-center justify-center text-2xl shadow-md" id="sim-left-container">
+                                    ❓
+                                </div>
+                            </div>
+
+                            <!-- Center Pivot -->
+                            <div class="w-6 h-6 bg-yellow-400 rounded-full border-2 border-slate-700"></div>
+
+                            <!-- Right Basket -->
+                            <div class="relative -mr-4 flex flex-col items-center">
+                                <div class="w-1 h-16 bg-slate-400"></div>
+                                <div class="w-24 h-12 bg-amber-400 rounded-b-full border-2 border-amber-600 flex flex-wrap items-center justify-center gap-1 p-1 text-xs font-bold text-slate-800 shadow-md" id="sim-right-container">
+                                    0g
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Cause & Effect Explanation Banner -->
+                    <div id="sim-explanation" class="w-full bg-blue-50 p-4 rounded-2xl border border-blue-200 text-center font-comic text-sm text-slate-700">
+                        Pilih benda di sebelah kiri, lalu tambahkan anak timbangan di sebelah kanan sampai <b>timbangan sejajar (seimbang)</b>!
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ================= PERMAINAN ================= -->
+        <section id="tab-permainan" class="tab-content hidden">
+            <div class="mb-6">
+                <h2 class="text-2xl md:text-3xl font-bold text-brand-pink">🎮 Arena Permainan & Tantangan</h2>
+                <p class="text-xs md:text-sm text-slate-500">Pilih mode permainan favoritmu untuk mengumpulkan poin!</p>
+            </div>
+
+            <!-- Game Mode Selector Buttons -->
+            <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-6 gap-3 mb-6">
+                <button onclick="switchGameMode('open-box')" class="game-tab-btn active p-3 rounded-2xl bg-white border-2 border-slate-200 font-bold text-xs text-center shadow hover:border-brand-pink transition" data-game="open-box">
+                    📦 Open Box
+                </button>
+                <button onclick="switchGameMode('drag-drop')" class="game-tab-btn p-3 rounded-2xl bg-white border-2 border-slate-200 font-bold text-xs text-center shadow hover:border-brand-pink transition" data-game="drag-drop">
+                    🎯 Drag & Drop
+                </button>
+                <button onclick="switchGameMode('fill-blank')" class="game-tab-btn p-3 rounded-2xl bg-white border-2 border-slate-200 font-bold text-xs text-center shadow hover:border-brand-pink transition" data-game="fill-blank">
+                    ✏️ Isian Rumpang
+                </button>
+                <button onclick="switchGameMode('match')" class="game-tab-btn p-3 rounded-2xl bg-white border-2 border-slate-200 font-bold text-xs text-center shadow hover:border-brand-pink transition" data-game="match">
+                    🧩 Menjodohkan
+                </button>
+                <button onclick="switchGameMode('true-false')" class="game-tab-btn p-3 rounded-2xl bg-white border-2 border-slate-200 font-bold text-xs text-center shadow hover:border-brand-pink transition" data-game="true-false">
+                    ✔️ Benar / Salah
+                </button>
+                <button onclick="switchGameMode('speed-run')" class="game-tab-btn p-3 rounded-2xl bg-white border-2 border-slate-200 font-bold text-xs text-center shadow hover:border-brand-pink transition" data-game="speed-run">
+                    ⚡ Tantangan Cepat
+                </button>
+            </div>
+
+            <!-- CONTAINER GAME MODES -->
+            <div class="glass-card p-6 rounded-3xl min-h-[400px]">
+
+                <!-- 1. OPEN THE BOX GAME -->
+                <div id="game-open-box" class="game-sub-content">
+                    <div class="text-center mb-6">
+                        <h3 class="text-xl font-bold text-slate-800">📦 Open The Box: Buka Kotak Misteri!</h3>
+                        <p class="text-xs text-slate-500">Klik kotak untuk membuka tantangan pertanyaan konversi berat.</p>
+                    </div>
+
+                    <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-4 max-w-3xl mx-auto" id="box-grid">
+                        <!-- Boxes generated via JS -->
+                    </div>
+
+                    <!-- Modal / Overlay for Box Question -->
+                    <div id="box-modal" class="hidden fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+                        <div class="bg-white p-6 rounded-3xl max-w-md w-full text-center border-4 border-brand-yellow shadow-2xl animate-bounce-short">
+                            <span class="text-4xl" id="box-icon">📦</span>
+                            <h4 class="text-lg font-bold text-slate-800 my-2" id="box-question-title">Kotak 1</h4>
+                            <p class="text-base text-slate-700 font-comic mb-4" id="box-question-text">1 kg sama dengan berapa gram?</p>
+                            
+                            <div class="grid grid-cols-2 gap-3 mb-4" id="box-options">
+                                <!-- Options dynamically inserted -->
+                            </div>
+
+                            <div id="box-feedback" class="hidden p-3 rounded-xl font-bold text-xs mb-3"></div>
+
+                            <button onclick="closeBoxModal()" class="px-6 py-2 bg-slate-200 hover:bg-slate-300 font-bold rounded-xl text-xs text-slate-700">
+                                Tutup Kotak
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 2. DRAG AND DROP GAME -->
+                <div id="game-drag-drop" class="game-sub-content hidden">
+                    <div class="text-center mb-6">
+                        <h3 class="text-xl font-bold text-slate-800">🎯 Drag & Drop / Klik Kelompok</h3>
+                        <p class="text-xs text-slate-500">Kelompokkan benda-benda ke keranjang Kilogram (kg) atau Gram (g)! (Klik benda lalu klik keranjang jika di HP).</p>
+                    </div>
+
+                    <!-- Benda Draggable / Selectable -->
+                    <div class="flex flex-wrap justify-center gap-3 mb-8" id="drag-items-container">
+                        <!-- Items rendered via JS -->
+                    </div>
+
+                    <!-- Drop Target Baskets -->
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div class="drop-zone rounded-2xl p-4 bg-blue-50/50 flex flex-col items-center justify-start border-2 border-brand-blue" data-category="kg" onclick="handleZoneClick('kg')">
+                            <div class="font-bold text-brand-blue mb-2 text-lg">🧺 Keranjang Berat (Kg)</div>
+                            <div class="text-xs text-slate-400 mb-2">Benda berat (> 1 kg)</div>
+                            <div class="flex flex-wrap gap-2 justify-center w-full min-h-[60px]" id="zone-kg"></div>
+                        </div>
+
+                        <div class="drop-zone rounded-2xl p-4 bg-emerald-50/50 flex flex-col items-center justify-start border-2 border-brand-green" data-category="g" onclick="handleZoneClick('g')">
+                            <div class="font-bold text-brand-green mb-2 text-lg">🧺 Keranjang Ringan (Gram)</div>
+                            <div class="text-xs text-slate-400 mb-2">Benda ringan (< 1 kg)</div>
+                            <div class="flex flex-wrap gap-2 justify-center w-full min-h-[60px]" id="zone-g"></div>
+                        </div>
+                    </div>
+
+                    <div class="text-center mt-6">
+                        <button onclick="checkDragDropResult()" class="px-8 py-3 bg-brand-green text-white font-bold rounded-2xl shadow-lg hover:bg-emerald-600 border-b-4 border-emerald-800">
+                            Periksa Jawaban
+                        </button>
+                    </div>
+                </div>
+
+                <!-- 3. FILL IN THE BLANK -->
+                <div id="game-fill-blank" class="game-sub-content hidden">
+                    <div class="text-center mb-6">
+                        <h3 class="text-xl font-bold text-slate-800">✏️ Isian Rumpang (Fill in the Blank)</h3>
+                        <p class="text-xs text-slate-500">Isilah titik-titik dengan angka konversi yang tepat!</p>
+                    </div>
+
+                    <div class="max-w-xl mx-auto space-y-4" id="fill-questions-container">
+                        <!-- Generated via JS -->
+                    </div>
+
+                    <div class="text-center mt-6">
+                        <button onclick="checkFillBlankResults()" class="px-8 py-3 bg-brand-purple text-white font-bold rounded-2xl shadow-lg hover:bg-purple-700 border-b-4 border-purple-900">
+                            Kirim Semua Jawaban
+                        </button>
+                    </div>
+                </div>
+
+                <!-- 4. MATCHING GAME -->
+                <div id="game-match" class="game-sub-content hidden">
+                    <div class="text-center mb-6">
+                        <h3 class="text-xl font-bold text-slate-800">🧩 Menjodohkan (Matching)</h3>
+                        <p class="text-xs text-slate-500">Pasangkan nilai di sebelah kiri dengan nilai seimbang di sebelah kanan!</p>
+                    </div>
+
+                    <div class="grid grid-cols-2 gap-4 max-w-2xl mx-auto" id="matching-container">
+                        <!-- Left column & Right Column generated by JS -->
+                    </div>
+
+                    <div class="text-center mt-6">
+                        <button onclick="resetMatching()" class="px-6 py-2 bg-slate-200 hover:bg-slate-300 font-bold rounded-xl text-xs text-slate-700">
+                            🔄 Ulangi Menjodohkan
+                        </button>
+                    </div>
+                </div>
+
+                <!-- 5. TRUE / FALSE GAME -->
+                <div id="game-true-false" class="game-sub-content hidden">
+                    <div class="text-center mb-6">
+                        <h3 class="text-xl font-bold text-slate-800">✔️ Benar atau Salah?</h3>
+                        <p class="text-xs text-slate-500">Tentukan apakah pernyataan berat di bawah ini Benar atau Salah!</p>
+                    </div>
+
+                    <div class="max-w-xl mx-auto space-y-4" id="tf-questions-container">
+                        <!-- Generated via JS -->
+                    </div>
+                </div>
+
+                <!-- 6. SPEED RUN TANTANGAN CEPAT -->
+                <div id="game-speed-run" class="game-sub-content hidden">
+                    <div class="text-center mb-6">
+                        <h3 class="text-xl font-bold text-slate-800">⚡ Tantangan Cepat (Speed Run)</h3>
+                        <p class="text-xs text-slate-500">Jawab sebanyak-banyaknya pertanyaan sebelum waktu habis!</p>
+                    </div>
+
+                    <div id="speed-start-screen" class="text-center py-8">
+                        <div class="text-6xl mb-4">⏱️</div>
+                        <h4 class="text-lg font-bold text-slate-700 mb-2">Waktu Kamu: 30 Detik</h4>
+                        <p class="text-xs text-slate-500 max-w-md mx-auto mb-6">Uji seberapa cepat pemahamanmu tentang konversi kg dan gram!</p>
+                        <button onclick="startSpeedRun()" class="px-8 py-4 bg-brand-orange text-white font-bold rounded-2xl shadow-lg hover:bg-amber-600 border-b-4 border-amber-800 text-lg">
+                            🚀 Mulai Tantangan!
+                        </button>
+                    </div>
+
+                    <div id="speed-play-screen" class="hidden max-w-md mx-auto text-center">
+                        <div class="flex justify-between items-center mb-6 bg-amber-50 p-4 rounded-2xl border border-amber-200">
+                            <div class="font-bold text-slate-700">⏱️ Sisa Waktu: <span id="speed-timer" class="text-rose-600 text-xl">30</span>s</div>
+                            <div class="font-bold text-slate-700">⭐ Skor: <span id="speed-score" class="text-brand-green text-xl">0</span></div>
+                        </div>
+
+                        <div class="bg-white p-6 rounded-3xl shadow-md border-2 border-slate-200 mb-6">
+                            <div class="text-xs text-slate-400 font-bold mb-1">PERTANYAAN</div>
+                            <h4 id="speed-question-text" class="text-2xl font-bold text-slate-800">3 kg = ... g</h4>
+                        </div>
+
+                        <div class="grid grid-cols-2 gap-3" id="speed-options font-bold">
+                            <!-- Options -->
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </section>
+
+        <!-- ================= KUIS ================= -->
+        <section id="tab-kuis" class="tab-content hidden">
+            <div class="mb-6">
+                <h2 class="text-2xl md:text-3xl font-bold text-brand-purple">📝 Kuis Evaluasi Satuan Berat</h2>
+                <p class="text-xs md:text-sm text-slate-500">Jawab 5 soal pilihan ganda untuk menguji pemahaman akhirmu!</p>
+            </div>
+
+            <div class="glass-card p-6 rounded-3xl max-w-3xl mx-auto border-t-8 border-brand-purple">
+                <!-- Quiz Progress -->
+                <div class="mb-6 flex justify-between items-center text-xs font-bold text-slate-500">
+                    <span id="quiz-progress-text">Soal 1 dari 5</span>
+                    <div class="w-1/2 bg-slate-200 h-3 rounded-full overflow-hidden">
+                        <div id="quiz-progress-bar" class="bg-brand-purple h-full w-1/5 transition-all"></div>
+                    </div>
+                </div>
+
+                <!-- Quiz Card Container -->
+                <div id="quiz-card">
+                    <h3 id="quiz-question" class="text-lg md:text-xl font-bold text-slate-800 mb-6">
+                        Loading Soal...
+                    </h3>
+
+                    <div id="quiz-options" class="space-y-3 mb-6">
+                        <!-- Options generated via JS -->
+                    </div>
+
+                    <!-- Feedback Box -->
+                    <div id="quiz-feedback" class="hidden p-4 rounded-2xl text-sm font-comic mb-6 border"></div>
+
+                    <div class="flex justify-between items-center pt-4 border-t">
+                        <button id="quiz-prev-btn" onclick="prevQuiz()" class="px-4 py-2 bg-slate-200 text-slate-700 font-bold rounded-xl text-xs hover:bg-slate-300 disabled:opacity-50">
+                            ⬅️ Sebelumnya
+                        </button>
+                        <button id="quiz-next-btn" onclick="nextQuiz()" class="px-6 py-2.5 bg-brand-purple text-white font-bold rounded-xl text-xs hover:bg-purple-700 shadow">
+                            Selanjutnya ➡️
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ================= HASIL & PRESTASI ================= -->
+        <section id="tab-hasil" class="tab-content hidden">
+            <div class="mb-6 text-center">
+                <h2 class="text-2xl md:text-3xl font-bold text-brand-orange">🏆 Hasil & Rapor Pembelajaran</h2>
+                <p class="text-xs md:text-sm text-slate-500">Lihat pencapaian luar biasa yang telah kamu dapatkan!</p>
+            </div>
+
+            <!-- Score Summary Dashboard -->
+            <div class="glass-card p-6 md:p-8 rounded-3xl max-w-4xl mx-auto mb-8 text-center border-b-8 border-brand-orange">
+                <div class="text-5xl mb-2" id="result-emoji">🌟</div>
+                <h3 class="text-2xl font-bold text-slate-800" id="result-title">Hebat Sekali!</h3>
+                <p class="text-slate-600 font-comic max-w-md mx-auto my-3 text-sm md:text-base" id="result-message">
+                    Kamu telah menyelesaikan berbagai tantangan pengukuran satuan berat dengan baik.
+                </p>
+
+                <div class="grid grid-cols-2 md:grid-cols-4 gap-4 my-6">
+                    <div class="bg-amber-50 p-4 rounded-2xl border border-amber-200">
+                        <div class="text-xs text-amber-700 font-bold">Total Skor XP</div>
+                        <div class="text-2xl md:text-3xl font-extrabold text-amber-600" id="final-total-score">0</div>
+                    </div>
+                    <div class="bg-emerald-50 p-4 rounded-2xl border border-emerald-200">
+                        <div class="text-xs text-emerald-700 font-bold">Kuis Selesai</div>
+                        <div class="text-2xl md:text-3xl font-extrabold text-emerald-600" id="final-quiz-score">0/5</div>
+                    </div>
+                    <div class="bg-sky-50 p-4 rounded-2xl border border-sky-200">
+                        <div class="text-xs text-sky-700 font-bold">Tantangan Cepat</div>
+                        <div class="text-2xl md:text-3xl font-extrabold text-sky-600" id="final-speed-score">0</div>
+                    </div>
+                    <div class="bg-purple-50 p-4 rounded-2xl border border-purple-200">
+                        <div class="text-xs text-purple-700 font-bold">Lencana Berhasil</div>
+                        <div class="text-2xl md:text-3xl font-extrabold text-purple-600" id="final-badge-count">0/5</div>
+                    </div>
+                </div>
+
+                <button onclick="triggerConfetti()" class="px-6 py-3 bg-brand-yellow hover:bg-amber-400 text-amber-900 font-bold rounded-2xl shadow-md transition text-sm">
+                    🎉 Rayakan Kelulusan!
+                </button>
+            </div>
+
+            <!-- Badges Collection Grid -->
+            <h3 class="text-xl font-bold text-slate-700 mb-4 flex items-center justify-center gap-2">
+                <i class="fa-solid fa-award text-amber-500"></i> Koleksi Lencana Penghargaan:
+            </h3>
+
+            <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-4 max-w-4xl mx-auto" id="badges-container">
+                <!-- Badges dynamically inserted -->
+            </div>
+        </section>
+
+    </main>
+
+    <!-- FOOTER -->
+    <footer class="text-center py-4 text-xs text-slate-500 font-comic mt-auto">
+        Media Pembelajaran Interaktif Matematika Kelas 3 SD • Pengukuran Satuan Berat
+    </footer>
+
+    <!-- AUDIO SYNTH & JAVASCRIPT LOGIC -->
+    <script>
+        // ================= AUDIO SYNTH (No external audio files needed) =================
+        const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        
+        function playSound(type) {
+            if (audioCtx.state === 'suspended') {
+                audioCtx.resume();
+            }
+            const osc = audioCtx.createOscillator();
+            const gain = audioCtx.createGain();
+            osc.connect(gain);
+            gain.connect(audioCtx.destination);
+
+            if (type === 'correct') {
+                osc.type = 'sine';
+                osc.frequency.setValueAtTime(523.25, audioCtx.currentTime); // C5
+                osc.frequency.exponentialRampToValueAtTime(659.25, audioCtx.currentTime + 0.1); // E5
+                osc.frequency.exponentialRampToValueAtTime(783.99, audioCtx.currentTime + 0.2); // G5
+                gain.gain.setValueAtTime(0.3, audioCtx.currentTime);
+                gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.3);
+                osc.start();
+                osc.stop(audioCtx.currentTime + 0.3);
+            } else if (type === 'wrong') {
+                osc.type = 'sawtooth';
+                osc.frequency.setValueAtTime(200, audioCtx.currentTime);
+                osc.frequency.exponentialRampToValueAtTime(120, audioCtx.currentTime + 0.2);
+                gain.gain.setValueAtTime(0.3, audioCtx.currentTime);
+                gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.2);
+                osc.start();
+                osc.stop(audioCtx.currentTime + 0.2);
+            } else if (type === 'click') {
+                osc.type = 'triangle';
+                osc.frequency.setValueAtTime(400, audioCtx.currentTime);
+                gain.gain.setValueAtTime(0.1, audioCtx.currentTime);
+                gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.05);
+                osc.start();
+                osc.stop(audioCtx.currentTime + 0.05);
+            }
+        }
+
+        // ================= GLOBAL STATE =================
+        let globalScore = 0;
+        let unlockedBadges = new Set();
+        const badgeList = [
+            { id: 'sim', name: 'Ahli Timbangan', icon: '⚖️', desc: 'Menyeimbangkan simulasi timbangan' },
+            { id: 'box', name: 'Pembuka Kotak', icon: '📦', desc: 'Menjawab 5 kotak misteri' },
+            { id: 'drag', name: 'Pilah Benda', icon: '🎯', desc: 'Menyelesaikan Drag & Drop' },
+            { id: 'speed', name: 'Kilat Tangkas', icon: '⚡', desc: 'Mencapai skor speed run > 50' },
+            { id: 'quiz', name: 'Master Satuan', icon: '🎓', desc: 'Menyelesaikan Kuis Evaluasi' }
+        ];
+
+        function addScore(points) {
+            globalScore += points;
+            document.getElementById('global-score').innerText = globalScore;
+            document.getElementById('final-total-score').innerText = globalScore;
+        }
+
+        function unlockBadge(id) {
+            if (!unlockedBadges.has(id)) {
+                unlockedBadges.add(id);
+                document.getElementById('badge-count').innerText = `${unlockedBadges.size}/5`;
+                document.getElementById('final-badge-count').innerText = `${unlockedBadges.size}/5`;
+                renderBadges();
+                triggerConfetti();
+            }
+        }
+
+        // Navigation Tab Logic
+        function showTab(tabId) {
+            playSound('click');
+            document.querySelectorAll('.tab-content').forEach(el => el.classList.add('hidden'));
+            document.getElementById(`tab-${tabId}`).classList.remove('hidden');
+
+            document.querySelectorAll('.nav-btn').forEach(btn => {
+                if (btn.dataset.tab === tabId) {
+                    btn.classList.add('bg-amber-100', 'font-extrabold', 'text-brand-pink');
+                } else {
+                    btn.classList.remove('bg-amber-100', 'font-extrabold', 'text-brand-pink');
+                }
+            });
+
+            // Close mobile menu if open
+            document.getElementById('nav-menu').classList.add('hidden');
+            document.getElementById('nav-menu').classList.remove('flex');
+        }
+
+        function toggleMobileMenu() {
+            const menu = document.getElementById('nav-menu');
+            menu.classList.toggle('hidden');
+            menu.classList.toggle('flex');
+            menu.classList.toggle('flex-col');
+        }
+
+        // ================= SIMULATION LOGIC =================
+        let simCurrentItem = null;
+        let simRightWeight = 0;
+
+        function setSimItem(name, weightGrams, emoji) {
+            playSound('click');
+            simCurrentItem = { name, weight: weightGrams, emoji };
+            document.getElementById('sim-left-container').innerText = `${emoji} ${name}`;
+            document.getElementById('sim-left-weight').innerText = `${weightGrams} gram (${weightGrams/1000} kg)`;
+            updateSimSeesaw();
+        }
+
+        function addSimWeight(grams) {
+            playSound('click');
+            simRightWeight += grams;
+            document.getElementById('sim-right-container').innerText = `${simRightWeight}g`;
+            document.getElementById('sim-right-weight').innerText = `${simRightWeight} gram (${simRightWeight/1000} kg)`;
+            updateSimSeesaw();
+        }
+
+        function resetSim() {
+            playSound('click');
+            simCurrentItem = null;
+            simRightWeight = 0;
+            document.getElementById('sim-left-container').innerText = '❓';
+            document.getElementById('sim-right-container').innerText = '0g';
+            document.getElementById('sim-left-weight').innerText = '0 gram';
+            document.getElementById('sim-right-weight').innerText = '0 gram';
+            document.getElementById('sim-beam').style.transform = 'rotate(0deg)';
+            document.getElementById('sim-status-badge').className = 'px-4 py-1 bg-amber-100 text-amber-800 rounded-full font-bold text-xs md:text-sm';
+            document.getElementById('sim-status-badge').innerText = '⚠️ Belum Seimbang';
+            document.getElementById('sim-explanation').innerText = 'Pilih benda di sebelah kiri, lalu tambahkan anak timbangan di sebelah kanan sampai timbangan seimbang!';
+        }
+
+        function updateSimSeesaw() {
+            const left = simCurrentItem ? simCurrentItem.weight : 0;
+            const right = simRightWeight;
+            const beam = document.getElementById('sim-beam');
+            const status = document.getElementById('sim-status-badge');
+            const exp = document.getElementById('sim-explanation');
+
+            if (left === 0 && right === 0) {
+                beam.style.transform = 'rotate(0deg)';
+                return;
+            }
+
+            if (left > right) {
+                const angle = Math.min((left - right) / 100, 15);
+                beam.style.transform = `rotate(-${angle}deg)`;
+                status.className = 'px-4 py-1 bg-rose-100 text-rose-800 rounded-full font-bold text-xs md:text-sm';
+                status.innerText = '⬅️ Berat Kiri';
+                exp.innerText = `Benda (${simCurrentItem.name}) masih lebih berat daripada beban kanan. Tambahkan beban lagi!`;
+            } else if (right > left) {
+                const angle = Math.min((right - left) / 100, 15);
+                beam.style.transform = `rotate(${angle}deg)`;
+                status.className = 'px-4 py-1 bg-sky-100 text-sky-800 rounded-full font-bold text-xs md:text-sm';
+                status.innerText = '➡️ Berat Kanan';
+                exp.innerText = `Beban kanan melebihi berat ${simCurrentItem.name}. Kurangi atau reset beban!`;
+            } else {
+                beam.style.transform = 'rotate(0deg)';
+                status.className = 'px-4 py-1 bg-emerald-100 text-emerald-800 rounded-full font-bold text-xs md:text-sm animate-bounce';
+                status.innerText = '🎉 SEIMBANG!';
+                exp.innerHTML = `<b>Luar Biasa!</b> Berat ${simCurrentItem.name} (${simCurrentItem.weight}g) <b>SAMA DENGAN</b> total beban kanan (${simRightWeight}g)!`;
+                playSound('correct');
+                addScore(20);
+                unlockBadge('sim');
+            }
+        }
+
+        // ================= GAME SUB-MODES SWITCH =================
+        function switchGameMode(gameId) {
+            playSound('click');
+            document.querySelectorAll('.game-sub-content').forEach(el => el.classList.add('hidden'));
+            document.getElementById(`game-${gameId}`).classList.remove('hidden');
+
+            document.querySelectorAll('.game-tab-btn').forEach(btn => {
+                if (btn.dataset.game === gameId) {
+                    btn.classList.add('border-brand-pink', 'bg-pink-50', 'text-brand-pink');
+                } else {
+                    btn.classList.remove('border-brand-pink', 'bg-pink-50', 'text-brand-pink');
+                }
+            });
+        }
+
+        // ---------------- 1. OPEN THE BOX ----------------
+        const boxData = [
+            { id: 1, q: '2 kg = ... gram', options: ['200 g', '2.000 g', '20 g', '20.000 g'], a: 1 },
+            { id: 2, q: '5.000 gram = ... kg', options: ['5 kg', '50 kg', '500 kg', '0.5 kg'], a: 0 },
+            { id: 3, q: '1 kg sama dengan berapa Ons?', options: ['5 Ons', '10 Ons', '100 Ons', '1.000 Ons'], a: 1 },
+            { id: 4, q: 'Berat permen biasanya menggunakan satuan?', options: ['Kilogram (kg)', 'Gram (g)', 'Meter (m)', 'Liter (l)'], a: 1 },
+            { id: 5, q: '3 kg + 500 g = ... gram', options: ['800 g', '3.500 g', '350 g', '35.000 g'], a: 1 }
+        ];
+        let openedBoxes = 0;
+
+        function initOpenBox() {
+            const grid = document.getElementById('box-grid');
+            grid.innerHTML = '';
+            boxData.forEach((box, idx) => {
+                const btn = document.createElement('button');
+                btn.className = 'p-6 rounded-3xl bg-amber-200 hover:bg-amber-300 border-b-4 border-amber-400 font-bold text-slate-800 flex flex-col items-center justify-center gap-2 shadow-md transition card-bounce';
+                btn.id = `box-btn-${idx}`;
+                btn.onclick = () => openBoxModal(idx);
+                btn.innerHTML = `<span class="text-4xl">📦</span><span class="text-xs">Kotak ${idx+1}</span>`;
+                grid.appendChild(btn);
+            });
+        }
+
+        function openBoxModal(idx) {
+            playSound('click');
+            const box = boxData[idx];
+            document.getElementById('box-question-title').innerText = `Kotak Misteri #${idx+1}`;
+            document.getElementById('box-question-text').innerText = box.q;
+            document.getElementById('box-feedback').classList.add('hidden');
+
+            const optContainer = document.getElementById('box-options');
+            optContainer.innerHTML = '';
+
+            box.options.forEach((opt, oIdx) => {
+                const oBtn = document.createElement('button');
+                oBtn.className = 'p-3 rounded-xl bg-slate-100 hover:bg-brand-yellow font-bold text-xs text-slate-700 transition border';
+                oBtn.innerText = opt;
+                oBtn.onclick = () => checkBoxAnswer(idx, oIdx);
+                optContainer.appendChild(oBtn);
+            });
+
+            document.getElementById('box-modal').classList.remove('hidden');
+        }
+
+        function checkBoxAnswer(boxIdx, selectedOpt) {
+            const box = boxData[boxIdx];
+            const fb = document.getElementById('box-feedback');
+            fb.classList.remove('hidden');
+
+            if (selectedOpt === box.a) {
+                playSound('correct');
+                fb.className = 'p-3 rounded-xl font-bold text-xs mb-3 bg-emerald-100 text-emerald-800 border border-emerald-300';
+                fb.innerText = '🎉 Benar sekali! Kamus hebat!';
+                addScore(10);
+                document.getElementById(`box-btn-${boxIdx}`).className = 'p-6 rounded-3xl bg-emerald-200 border-b-4 border-emerald-400 font-bold text-emerald-800 flex flex-col items-center justify-center gap-2 shadow-md opacity-75';
+                document.getElementById(`box-btn-${boxIdx}`).innerHTML = `<span class="text-4xl">🔓</span><span class="text-xs">Terbuka</span>`;
+                openedBoxes++;
+                if (openedBoxes >= 5) unlockBadge('box');
+            } else {
+                playSound('wrong');
+                fb.className = 'p-3 rounded-xl font-bold text-xs mb-3 bg-rose-100 text-rose-800 border border-rose-300';
+                fb.innerText = '❌ Masih kurang tepat, ayo coba lagi!';
+            }
+        }
+
+        function closeBoxModal() {
+            playSound('click');
+            document.getElementById('box-modal').classList.add('hidden');
+        }
+
+        // ---------------- 2. DRAG AND DROP ----------------
+        const dragItems = [
+            { id: 1, name: 'Sepeda', weight: '12 kg', category: 'kg', icon: '🚲' },
+            { id: 2, name: 'Klip Kertas', weight: '2 g', category: 'g', icon: '📎' },
+            { id: 3, name: 'Lemari Baju', weight: '40 kg', category: 'kg', icon: '🚪' },
+            { id: 4, name: 'Sendok', weight: '25 g', category: 'g', icon: '🥄' },
+            { id: 5, name: 'Beras 1 Karung', weight: '25 kg', category: 'kg', icon: '🌾' }
+        ];
+        let selectedDragItem = null;
+
+        function initDragDrop() {
+            const container = document.getElementById('drag-items-container');
+            container.innerHTML = '';
+            dragItems.forEach(item => {
+                const div = document.createElement('div');
+                div.className = 'p-3 bg-white rounded-2xl border-2 border-slate-200 shadow cursor-pointer font-bold text-xs flex items-center gap-2 card-bounce';
+                div.id = `drag-item-${item.id}`;
+                div.onclick = () => selectDragItem(item.id);
+                div.innerHTML = `<span class="text-xl">${item.icon}</span> <span>${item.name} (${item.weight})</span>`;
+                container.appendChild(div);
+            });
+            document.getElementById('zone-kg').innerHTML = '';
+            document.getElementById('zone-g').innerHTML = '';
+        }
+
+        function selectDragItem(id) {
+            playSound('click');
+            selectedDragItem = dragItems.find(i => i.id === id);
+            dragItems.forEach(i => {
+                const el = document.getElementById(`drag-item-${i.id}`);
+                if (el) {
+                    if (i.id === id) el.classList.add('ring-4', 'ring-amber-400');
+                    else el.classList.remove('ring-4', 'ring-amber-400');
+                }
+            });
+        }
+
+        function handleZoneClick(category) {
+            if (!selectedDragItem) return;
+            playSound('click');
+            const zone = document.getElementById(`zone-${category}`);
+            const itemEl = document.getElementById(`drag-item-${selectedDragItem.id}`);
+            if (itemEl) {
+                itemEl.classList.remove('ring-4', 'ring-amber-400');
+                itemEl.dataset.assigned = category;
+                zone.appendChild(itemEl);
+            }
+            selectedDragItem = null;
+        }
+
+        function checkDragDropResult() {
+            let correct = 0;
+            dragItems.forEach(item => {
+                const el = document.getElementById(`drag-item-${item.id}`);
+                if (el && el.dataset.assigned === item.category) {
+                    correct++;
+                }
+            });
+
+            if (correct === dragItems.length) {
+                playSound('correct');
+                alert('🎉 Hebat! Semua benda dikelompokkan dengan benar!');
+                addScore(30);
+                unlockBadge('drag');
+            } else {
+                playSound('wrong');
+                alert(`Cobalah lagi! Kamu benar ${correct} dari ${dragItems.length} benda.`);
+            }
+        }
+
+        // ---------------- 3. FILL IN THE BLANK ----------------
+        const fillQuestions = [
+            { id: 1, q: '4 kg = ... gram', ans: '4000' },
+            { id: 2, q: '7000 g = ... kg', ans: '7' },
+            { id: 3, q: '3 kg 200 g = ... gram', ans: '3200' },
+            { id: 4, q: '6 Ons = ... gram', ans: '600' },
+            { id: 5, q: '20 Ons = ... kg', ans: '2' }
+        ];
+
+        function initFillBlank() {
+            const container = document.getElementById('fill-questions-container');
+            container.innerHTML = '';
+            fillQuestions.forEach((q, idx) => {
+                const div = document.createElement('div');
+                div.className = 'flex items-center justify-between p-4 bg-purple-50 rounded-2xl border border-purple-200';
+                div.innerHTML = `
+                    <span class="font-bold text-slate-800 text-sm md:text-base">${idx+1}. ${q.q}</span>
+                    <input type="number" id="fill-input-${q.id}" class="w-28 p-2 rounded-xl border-2 border-purple-300 text-center font-bold text-slate-800 focus:outline-none focus:border-brand-purple" placeholder="Jawaban">
+                `;
+                container.appendChild(div);
+            });
+        }
+
+        function checkFillBlankResults() {
+            let score = 0;
+            fillQuestions.forEach(q => {
+                const input = document.getElementById(`fill-input-${q.id}`);
+                if (input.value.trim() === q.ans) {
+                    score++;
+                    input.className = 'w-28 p-2 rounded-xl border-2 border-emerald-500 bg-emerald-50 text-center font-bold text-emerald-800';
+                } else {
+                    input.className = 'w-28 p-2 rounded-xl border-2 border-rose-500 bg-rose-50 text-center font-bold text-rose-800';
+                }
+            });
+
+            if (score === fillQuestions.length) {
+                playSound('correct');
+                alert('🏆 Sempurna! Semua isian rumpang terjawab dengan benar!');
+                addScore(25);
+            } else {
+                playSound('wrong');
+                alert(`Kamu menjawab benar ${score} dari ${fillQuestions.length} soal.`);
+            }
+        }
+
+        // ---------------- 4. MATCHING GAME ----------------
+        const matchPairs = [
+            { left: '1 kg', right: '1.000 g' },
+            { left: '10 Ons', right: '1 kg' },
+            { left: '500 g', right: '0,5 kg' },
+            { left: '2 kg', right: '20 Ons' },
+            { left: '1 Ons', right: '100 g' }
+        ];
+        let selectedMatchLeft = null;
+
+        function initMatching() {
+            const container = document.getElementById('matching-container');
+            container.innerHTML = '';
+
+            const leftCol = document.createElement('div');
+            leftCol.className = 'space-y-3';
+            const rightCol = document.createElement('div');
+            rightCol.className = 'space-y-3';
+
+            // Shuffle right answers
+            const shuffledRight = [...matchPairs].sort(() => Math.random() - 0.5);
+
+            matchPairs.forEach((pair, idx) => {
+                const lBtn = document.createElement('button');
+                lBtn.className = 'w-full p-4 rounded-2xl bg-amber-100 hover:bg-amber-200 border-2 border-amber-300 font-bold text-slate-800 text-sm shadow transition';
+                lBtn.innerText = pair.left;
+                lBtn.id = `match-left-${idx}`;
+                lBtn.onclick = () => selectMatchLeft(idx);
+                leftCol.appendChild(lBtn);
+            });
+
+            shuffledRight.forEach((pair, idx) => {
+                const rBtn = document.createElement('button');
+                rBtn.className = 'w-full p-4 rounded-2xl bg-sky-100 hover:bg-sky-200 border-2 border-sky-300 font-bold text-slate-800 text-sm shadow transition';
+                rBtn.innerText = pair.right;
+                rBtn.id = `match-right-${idx}`;
+                rBtn.onclick = () => selectMatchRight(pair.right, idx);
+                rightCol.appendChild(rBtn);
+            });
+
+            container.appendChild(leftCol);
+            container.appendChild(rightCol);
+        }
+
+        function selectMatchLeft(idx) {
+            playSound('click');
+            selectedMatchLeft = idx;
+            matchPairs.forEach((_, i) => {
+                const el = document.getElementById(`match-left-${i}`);
+                if (i === idx) el.classList.add('ring-4', 'ring-brand-orange');
+                else el.classList.remove('ring-4', 'ring-brand-orange');
+            });
+        }
+
+        function selectMatchRight(rightText, rIdx) {
+            if (selectedMatchLeft === null) return;
+            playSound('click');
+
+            const correctRightText = matchPairs[selectedMatchLeft].right;
+            if (rightText === correctRightText) {
+                playSound('correct');
+                document.getElementById(`match-left-${selectedMatchLeft}`).className = 'w-full p-4 rounded-2xl bg-emerald-200 text-emerald-800 font-bold text-sm shadow border-2 border-emerald-400 opacity-60';
+                document.getElementById(`match-right-${rIdx}`).className = 'w-full p-4 rounded-2xl bg-emerald-200 text-emerald-800 font-bold text-sm shadow border-2 border-emerald-400 opacity-60';
+                addScore(10);
+            } else {
+                playSound('wrong');
+                alert('Pasangan belum tepat, coba cari nilai yang setara!');
+            }
+            selectedMatchLeft = null;
+        }
+
+        function resetMatching() {
+            initMatching();
+        }
+
+        // ---------------- 5. TRUE / FALSE ----------------
+        const tfQuestions = [
+            { id: 1, q: '1 Kilogram sama beratnya dengan 100 Gram.', a: false, exp: 'Salah! 1 kg sama dengan 1.000 gram.' },
+            { id: 2, q: 'Gajah lebih cocok diukur dengan satuan Kilogram.', a: true, exp: 'Benar! Gajah adalah hewan yang sangat berat.' },
+            { id: 3, q: '5 kg lebih ringan daripada 2.000 g.', a: false, exp: 'Salah! 5 kg (5.000 g) lebih berat dari 2.000 g.' },
+            { id: 4, q: '1 Ons setara dengan 100 Gram.', a: true, exp: 'Benar! 1 Ons = 100 Gram.' },
+            { id: 5, q: 'Mangkuk timbangan akan turun ke bawah jika bahannya lebih berat.', a: true, exp: 'Benar! Sisi yang lebih berat akan turun ke bawah.' }
+        ];
+
+        function initTrueFalse() {
+            const container = document.getElementById('tf-questions-container');
+            container.innerHTML = '';
+            tfQuestions.forEach((q, idx) => {
+                const card = document.createElement('div');
+                card.className = 'p-4 bg-white rounded-2xl border-2 border-slate-200 shadow space-y-3';
+                card.innerHTML = `
+                    <p class="font-bold text-slate-800 text-sm md:text-base">${idx+1}. "${q.q}"</p>
+                    <div class="flex gap-3">
+                        <button onclick="answerTF(${idx}, true)" class="flex-1 py-2 bg-emerald-100 hover:bg-emerald-200 text-emerald-800 font-bold rounded-xl text-xs transition border border-emerald-300">
+                            ✔️ BENAR
+                        </button>
+                        <button onclick="answerTF(${idx}, false)" class="flex-1 py-2 bg-rose-100 hover:bg-rose-200 text-rose-800 font-bold rounded-xl text-xs transition border border-rose-300">
+                            ❌ SALAH
+                        </button>
+                    </div>
+                    <div id="tf-exp-${idx}" class="hidden text-xs font-comic p-2 rounded-xl bg-slate-100 text-slate-600"></div>
+                `;
+                container.appendChild(card);
+            });
+        }
+
+        function answerTF(idx, userAns) {
+            const q = tfQuestions[idx];
+            const expEl = document.getElementById(`tf-exp-${idx}`);
+            expEl.classList.remove('hidden');
+
+            if (userAns === q.a) {
+                playSound('correct');
+                expEl.className = 'text-xs font-comic p-2 rounded-xl bg-emerald-100 text-emerald-800 border border-emerald-300 font-bold';
+                expEl.innerText = `🎉 Tepat Sekali! ${q.exp}`;
+                addScore(10);
+            } else {
+                playSound('wrong');
+                expEl.className = 'text-xs font-comic p-2 rounded-xl bg-rose-100 text-rose-800 border border-rose-300 font-bold';
+                expEl.innerText = `❌ Kurang Tepat! ${q.exp}`;
+            }
+        }
+
+        // ---------------- 6. SPEED RUN ----------------
+        const speedQuestions = [
+            { q: '1 kg = ... g', options: ['100 g', '1.000 g', '10 g'], a: 1 },
+            { q: '3.000 g = ... kg', options: ['3 kg', '30 kg', '300 kg'], a: 0 },
+            { q: '2 kg + 1 kg = ... g', options: ['300 g', '3.000 g', '30 g'], a: 1 },
+            { q: '4 Ons = ... g', options: ['40 g', '400 g', '4.000 g'], a: 1 },
+            { q: '5 kg = ... Ons', options: ['50 Ons', '5 Ons', '500 Ons'], a: 0 }
+        ];
+        let speedTimer = 30;
+        let speedInterval = null;
+        let speedScore = 0;
+        let speedCurrentQ = 0;
+
+        function startSpeedRun() {
+            playSound('click');
+            speedTimer = 30;
+            speedScore = 0;
+            speedCurrentQ = 0;
+            document.getElementById('speed-start-screen').classList.add('hidden');
+            document.getElementById('speed-play-screen').classList.remove('hidden');
+            document.getElementById('speed-timer').innerText = speedTimer;
+            document.getElementById('speed-score').innerText = speedScore;
+
+            clearInterval(speedInterval);
+            speedInterval = setInterval(() => {
+                speedTimer--;
+                document.getElementById('speed-timer').innerText = speedTimer;
+                if (speedTimer <= 0) {
+                    clearInterval(speedInterval);
+                    endSpeedRun();
+                }
+            }, 1000);
+
+            showSpeedQuestion();
+        }
+
+        function showSpeedQuestion() {
+            const q = speedQuestions[speedCurrentQ % speedQuestions.length];
+            document.getElementById('speed-question-text').innerText = q.q;
+            const optDiv = document.getElementById('speed-options');
+            optDiv.innerHTML = '';
+
+            q.options.forEach((opt, idx) => {
+                const btn = document.createElement('button');
+                btn.className = 'p-4 bg-amber-100 hover:bg-amber-200 border-2 border-amber-300 font-bold rounded-2xl text-slate-800 text-sm shadow transition';
+                btn.innerText = opt;
+                btn.onclick = () => answerSpeedQuestion(idx === q.a);
+                optDiv.appendChild(btn);
+            });
+        }
+
+        function answerSpeedQuestion(isCorrect) {
+            if (isCorrect) {
+                playSound('correct');
+                speedScore += 20;
+                document.getElementById('speed-score').innerText = speedScore;
+            } else {
+                playSound('wrong');
+            }
+            speedCurrentQ++;
+            showSpeedQuestion();
+        }
+
+        function endSpeedRun() {
+            playSound('correct');
+            alert(`⏱️ Waktu Habis! Skor Tantangan Cepat Kamu: ${speedScore}`);
+            addScore(speedScore);
+            document.getElementById('final-speed-score').innerText = speedScore;
+            if (speedScore >= 50) unlockBadge('speed');
+            document.getElementById('speed-start-screen').classList.remove('hidden');
+            document.getElementById('speed-play-screen').classList.add('hidden');
+        }
+
+        // ================= KUIS EVALUASI (5 QUESTIONS) =================
+        const quizData = [
+            {
+                q: 'Ibu membeli 3 kg beras di toko. Berapa gramkah berat beras tersebut?',
+                options: ['30 gram', '300 gram', '3.000 gram', '30.000 gram'],
+                ans: 2,
+                exp: 'Penjelasan: 1 kg = 1.000 gram. Jadi, 3 kg = 3 x 1.000 gram = 3.000 gram.'
+            },
+            {
+                q: 'Lani menimbang 2 buah buah semangka. Semangka pertama beratnya 2 kg dan semangka kedua 1.500 gram. Berapa total berat keduanya dalam gram?',
+                options: ['3.500 gram', '2.500 gram', '3.000 gram', '4.000 gram'],
+                ans: 0,
+                exp: 'Penjelasan: 2 kg = 2.000 gram. Total berat = 2.000 g + 1.500 g = 3.500 gram.'
+            },
+            {
+                q: 'Manakah benda di bawah ini yang sebaiknya diukur menggunakan satuan Gram (g)?',
+                options: ['Mobil', 'Satu bungkus permen', 'Karung beras', 'Sapi'],
+                ans: 1,
+                exp: 'Penjelasan: Permen adalah benda berukuran ringan, sehingga paling cocok diukur dengan satuan Gram.'
+            },
+            {
+                q: 'Ayah memiliki 50 Ons gula pasir. Jika diubah ke dalam satuan Kilogram (kg), gula Ayah sama dengan...',
+                options: ['500 kg', '50 kg', '5 kg', '0.5 kg'],
+                ans: 2,
+                exp: 'Penjelasan: 10 Ons = 1 kg. Maka 50 Ons = 50 ÷ 10 = 5 kg.'
+            },
+            {
+                q: 'Timbangan buah menunjukkan angka 4.000 gram. Nilai tersebut setara dengan...',
+                options: ['4 kg', '40 kg', '400 kg', '400 Ons'],
+                ans: 0,
+                exp: 'Penjelasan: 1.000 gram = 1 kg. Maka 4.000 gram = 4 kg.'
+            }
+        ];
+        let currentQuizIndex = 0;
+        let quizAnswers = Array(quizData.length).fill(null);
+
+        function renderQuiz() {
+            const q = quizData[currentQuizIndex];
+            document.getElementById('quiz-progress-text').innerText = `Soal ${currentQuizIndex + 1} dari ${quizData.length}`;
+            document.getElementById('quiz-progress-bar').style.width = `${((currentQuizIndex + 1) / quizData.length) * 100}%`;
+            document.getElementById('quiz-question').innerText = `${currentQuizIndex + 1}. ${q.q}`;
+
+            const optContainer = document.getElementById('quiz-options');
+            optContainer.innerHTML = '';
+
+            q.options.forEach((opt, idx) => {
+                const btn = document.createElement('button');
+                const isSelected = quizAnswers[currentQuizIndex] === idx;
+                btn.className = `w-full text-left p-4 rounded-2xl font-bold text-xs md:text-sm transition flex items-center justify-between border-2 ${
+                    isSelected ? 'bg-purple-100 border-brand-purple text-brand-purple' : 'bg-slate-50 border-slate-200 text-slate-700 hover:bg-slate-100'
+                }`;
+                btn.onclick = () => selectQuizAnswer(idx);
+                btn.innerHTML = `<span>${String.fromCharCode(65 + idx)}. ${opt}</span> ${isSelected ? '<span>✔️</span>' : ''}`;
+                optContainer.appendChild(btn);
+            });
+
+            // Feedback Display
+            const fb = document.getElementById('quiz-feedback');
+            if (quizAnswers[currentQuizIndex] !== null) {
+                fb.classList.remove('hidden');
+                if (quizAnswers[currentQuizIndex] === q.ans) {
+                    fb.className = 'p-4 rounded-2xl text-xs md:text-sm font-comic mb-6 bg-emerald-100 text-emerald-800 border border-emerald-300';
+                    fb.innerHTML = `<b>🎉 Jawaban Benar!</b><br>${q.exp}`;
+                } else {
+                    fb.className = 'p-4 rounded-2xl text-xs md:text-sm font-comic mb-6 bg-rose-100 text-rose-800 border border-rose-300';
+                    fb.innerHTML = `<b>❌ Jawaban Kurang Tepat!</b><br>${q.exp}`;
+                }
+            } else {
+                fb.classList.add('hidden');
+            }
+
+            // Buttons State
+            document.getElementById('quiz-prev-btn').disabled = currentQuizIndex === 0;
+            const nextBtn = document.getElementById('quiz-next-btn');
+            if (currentQuizIndex === quizData.length - 1) {
+                nextBtn.innerText = 'Selesai & Lihat Hasil 🏆';
+            } else {
+                nextBtn.innerText = 'Selanjutnya ➡️';
+            }
+        }
+
+        function selectQuizAnswer(optIdx) {
+            playSound('click');
+            quizAnswers[currentQuizIndex] = optIdx;
+            if (optIdx === quizData[currentQuizIndex].ans) {
+                playSound('correct');
+            } else {
+                playSound('wrong');
+            }
+            renderQuiz();
+        }
+
+        function prevQuiz() {
+            if (currentQuizIndex > 0) {
+                currentQuizIndex--;
+                renderQuiz();
+            }
+        }
+
+        function nextQuiz() {
+            if (currentQuizIndex < quizData.length - 1) {
+                currentQuizIndex++;
+                renderQuiz();
+            } else {
+                // Calculate Final Quiz Score
+                let correctCount = 0;
+                quizAnswers.forEach((ans, idx) => {
+                    if (ans === quizData[idx].ans) correctCount++;
+                });
+                addScore(correctCount * 20);
+                document.getElementById('final-quiz-score').innerText = `${correctCount}/${quizData.length}`;
+                unlockBadge('quiz');
+                showTab('hasil');
+            }
+        }
+
+        // ================= BADGES DISPLAY LOGIC =================
+        function renderBadges() {
+            const container = document.getElementById('badges-container');
+            container.innerHTML = '';
+            badgeList.forEach(b => {
+                const isUnlocked = unlockedBadges.has(b.id);
+                const div = document.createElement('div');
+                div.className = `p-4 rounded-3xl text-center border-2 transition ${
+                    isUnlocked ? 'bg-amber-50 border-amber-300 shadow-md card-bounce' : 'bg-slate-100 border-slate-200 opacity-50 grayscale'
+                }`;
+                div.innerHTML = `
+                    <div class="text-4xl mb-2">${b.icon}</div>
+                    <div class="font-bold text-slate-800 text-xs">${b.name}</div>
+                    <div class="text-[10px] text-slate-500 font-comic mt-1">${b.desc}</div>
+                    <div class="mt-2 text-[10px] font-bold ${isUnlocked ? 'text-emerald-600' : 'text-slate-400'}">
+                        ${isUnlocked ? '✔️ Terbuka' : '🔒 Terkunci'}
+                    </div>
+                `;
+                container.appendChild(div);
+            });
+        }
+
+        function triggerConfetti() {
+            confetti({
+                particleCount: 100,
+                spread: 70,
+                origin: { y: 0.6 }
+            });
+        }
+
+        // ================= INITIALIZATION ON WINDOW LOAD =================
+        window.onload = function() {
+            initOpenBox();
+            initDragDrop();
+            initFillBlank();
+            initMatching();
+            initTrueFalse();
+            renderQuiz();
+            renderBadges();
+        };
+    </script>
+</body>
+</html>
